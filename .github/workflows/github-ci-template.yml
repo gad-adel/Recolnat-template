@@ -50,10 +50,15 @@ jobs:
       - name: Set app version depending on branch
         id: set-vars
         run: |
-          if [[ "${GITHUB_REF_NAME}" == "develop" ]]; then echo "app_version=dev" >> $GITHUB_OUTPUT
-          elif [[ "${GITHUB_REF_NAME}" == "staging" ]]; then echo "app_version=rc" >> $GITHUB_OUTPUT
-          elif [[ "${GITHUB_REF_NAME}" == "main" ]]; then echo "app_version=prod" >> $GITHUB_OUTPUT
-          else echo "app_version=${GITHUB_REF_NAME}-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+          if [[ "${GITHUB_REF_NAME}" == "develop" ]]; then
+            echo "app_version=dev" >> $GITHUB_OUTPUT
+          elif [[ "${GITHUB_REF_NAME}" == "staging" ]]; then
+            echo "app_version=rc" >> $GITHUB_OUTPUT
+          elif [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+            echo "app_version=prod" >> $GITHUB_OUTPUT
+          else
+            echo "app_version=${GITHUB_REF_NAME}-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+          fi
       - name: Build with Maven
         run: |
           mvn -s .m2/settings.xml --batch-mode -Dmaven.repo.local=.m2/repository \
