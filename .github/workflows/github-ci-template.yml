@@ -107,6 +107,7 @@
 #           docker push ${{ env.HARBOR_REGISTRY }}/recolnat/backend:${{ needs.docker-build.outputs.app_version }}
 
 name: Backend CI/CD Pipeline
+
 on:
   push:
     branches:
@@ -117,115 +118,82 @@ on:
     branches:
       - develop
       - main
-  workflow_call:
-    # Déclare les inputs que ce workflow réutilisable attend
-    inputs:
-      project_ci:
-        required: true
-        type: string
-        description: 'Nom du projet CI (ex: Recolnat-explorer)'
-
-    # Déclare les secrets que ce workflow réutilisable attend
-    secrets:
-      SONAR_TOKEN:
-        required: true
-        description: 'Token SonarQube pour l''analyse de code.'
-      HARBOR_REGISTRY_USER:
-        required: true
-        description: 'Nom d''utilisateur pour la connexion à Harbor Registry.'
-      HARBOR_REGISTRY_PASSWORD:
-        required: true
-        description: 'Mot de passe pour la connexion à Harbor Registry.'
-
-    # Déclare les outputs que ce workflow réutilisable peut fournir
-    outputs:
-      app_version:
-        description: "Version de l'application déterminée et utilisée pour la construction."
-        value: ${{ jobs.build.outputs.app_version }} # Mappe l'output du job 'build' à l'output du workflow
 
 env:
-  MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
-  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
-  DOCKER_DRIVER: overlay2
   RECOLNAT_VERSION: 1.0.0
+  DOCKER_DRIVER: overlay2
   HARBOR_REGISTRY: dfgxr43v.c1.gra9.container-registry.ovh.net/dinsi-oci-images-repo
 
 jobs:
-  sast:
-    name: SAST
-    runs-on: ubuntu-latest
-    container:
-      image: registry.gitlab.com/gitlab-org/security-products/sast:13-4-stable
-      options: --entrypoint ""
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run SAST
-        run: /analyze
-
   build:
     runs-on: ubuntu-latest
+    outputs:
+      app_version: ${{ steps.set-vars.outputs.app_version }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set APP_VERSION
-        id: version
+      - name: Set app version depending on branch
+        id: set-vars
         run: |
           if [[ "${GITHUB_REF_NAME}" == "develop" ]]; then
-            echo "APP_VERSION=dev" >> $GITHUB_ENV
+            echo "app_version=dev" >> $GITHUB_OUTPUT
           elif [[ "${GITHUB_REF_NAME}" == "staging" ]]; then
-            echo "APP_VERSION=rc" >> $GITHUB_ENV
+            echo "app_version=rc" >> $GITHUB_OUTPUT
           elif [[ "${GITHUB_REF_NAME}" == "main" ]]; then
-            echo "APP_VERSION=prod" >> $GITHUB_ENV
-          elif [[ "${GITHUB_REF_NAME}" == "refonte" ]]; then
-            echo "APP_VERSION=test" >> $GITHUB_ENV
+            echo "app_version=prod" >> $GITHUB_OUTPUT
+          else
+            echo "app_version=${GITHUB_REF_NAME}-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Build with Maven
+      - name: Build with Maven (force Maven Central)
         run: |
-          echo "Compiling with version $APP_VERSION"
-          mvn $MAVEN_CLI_OPTS -Drevision=$APP_VERSION clean install -f ./pom.xml
+          mvn -s .m2/settings.xml --batch-mode -Dmaven.repo.local=.m2/repository \
+            -Drevision=${{ steps.set-vars.outputs.app_version }} clean install -f ./pom.xml
 
-  sonarqube-track:
+  docker-build:
     runs-on: ubuntu-latest
     needs: [build]
+    outputs:
+      app_version: ${{ needs.build.outputs.app_version }}
     steps:
       - uses: actions/checkout@v4
-      - name: SonarQube analysis
+
+      - name: Build Docker Image (no push)
         run: |
-          mvn clean verify sonar:sonar \
-            -Dsonar.projectKey=${{ github.event.repository.name }} \
-            -Dsonar.projectName=${{ github.event.repository.name }} \
-            -Dsonar.host.url=https://dinsi-sonarqube.mnhn.fr \
-            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
-        continue-on-error: true
+          docker build -t backend:${{ needs.build.outputs.app_version }} .
+
+      - name: Save Docker Image as artifact
+        run: |
+          docker save backend:${{ needs.build.outputs.app_version }} -o image.tar
+
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-image
+          path: image.tar
 
   docker-publish:
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [docker-build]
     steps:
-      - uses: actions/checkout@v4
+      - name: Download Docker image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-image
+          path: .
 
-      - name: Set APP_VERSION
+      - name: Load Docker image
         run: |
-          if [[ "${GITHUB_REF_NAME}" == "develop" ]]; then
-            echo "APP_VERSION=dev" >> $GITHUB_ENV
-          elif [[ "${GITHUB_REF_NAME}" == "staging" ]]; then
-            echo "APP_VERSION=rc" >> $GITHUB_ENV
-          elif [[ "${GITHUB_REF_NAME}" == "main" ]]; then
-            echo "APP_VERSION=prod" >> $GITHUB_ENV
-          elif [[ "${GITHUB_REF_NAME}" == "refonte" ]]; then
-            echo "APP_VERSION=test" >> $GITHUB_ENV
-          fi
+          docker load -i image.tar
 
-      - name: Docker login
+      - name: Docker login to Harbor
         run: |
           docker login ${{ env.HARBOR_REGISTRY }}/recolnat/ \
             -u '${{ secrets.HARBOR_REGISTRY_USER }}' \
             -p '${{ secrets.HARBOR_REGISTRY_PASSWORD }}'
 
-      - name: Build and Push Docker Image
+      - name: Tag and push Docker Image
         run: |
-          docker build -t backend:$APP_VERSION .
-          docker tag backend:$APP_VERSION \
-            ${{ env.HARBOR_REGISTRY }}/recolnat/backend:$APP_VERSION
-          docker push ${{ env.HARBOR_REGISTRY }}/recolnat/backend:$APP_VERSION
+          docker tag backend:${{ needs.docker-build.outputs.app_version }} \
+            ${{ env.HARBOR_REGISTRY }}/recolnat/backend:${{ needs.docker-build.outputs.app_version }}
+          docker push ${{ env.HARBOR_REGISTRY }}/recolnat/backend:${{ needs.docker-build.outputs.app_version }}
