@@ -168,7 +168,30 @@ jobs:
           else
             echo "app_version=${GITHUB_REF_NAME}-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
           fi
+# ##
+      - name: Override Maven settings.xml (force Maven Central)
+        run: |
+          mkdir -p .m2
+          cat > .m2/settings.xml << 'EOF'
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                                        https://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <mirrors>
+              <mirror>
+                <id>central</id>
+                <mirrorOf>*</mirrorOf>
+                <url>https://repo.maven.apache.org/maven2</url>
+              </mirror>
+            </mirrors>
+          </settings>
+          EOF
 
+      - name: Build with Maven (use overridden settings.xml)
+        run: |
+          mvn -s .m2/settings.xml --batch-mode -Dmaven.repo.local=.m2/repository \
+            -Drevision=${{ steps.set-vars.outputs.app_version }} clean install -f ./pom.xml
+# ##
       - name: Build with Maven (force Maven Central)
         run: |
           mvn -s .m2/settings.xml --batch-mode -Dmaven.repo.local=.m2/repository \
