@@ -252,6 +252,13 @@ on:
     branches:
       - develop
       - main
+  workflow_call:
+    # Déclare les inputs que ce workflow réutilisable attend
+    inputs:
+      project_ci:
+        required: true
+        type: string
+        description: 'Nom du projet CI (ex: Recolnat-explorer)'
 
 env:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
