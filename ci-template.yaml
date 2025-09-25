@@ -140,3 +140,4 @@ docker-publish-test:
     - mvn $MAVEN_CLI_OPTS -Drevision=$APP_VERSION clean deploy -DskipTests -f ./pom.xml
   only:
     - refonte
+

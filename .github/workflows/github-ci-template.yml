@@ -106,7 +106,142 @@
 #             ${{ env.HARBOR_REGISTRY }}/recolnat/backend:${{ needs.docker-build.outputs.app_version }}
 #           docker push ${{ env.HARBOR_REGISTRY }}/recolnat/backend:${{ needs.docker-build.outputs.app_version }}
 
-name: Backend CI/CD Pipeline
+# name: Backend CI/CD Pipeline
+# on:
+#   push:
+#     branches:
+#       - develop
+#       - staging
+#       - main
+#   pull_request:
+#     branches:
+#       - develop
+#       - main
+#   workflow_call:
+#     # Déclare les inputs que ce workflow réutilisable attend
+#     inputs:
+#       project_ci:
+#         required: true
+#         type: string
+#         description: 'Nom du projet CI (ex: Recolnat-explorer)'
+
+#     # Déclare les secrets que ce workflow réutilisable attend
+#     secrets:
+#       SONAR_TOKEN:
+#         required: true
+#         description: 'Token SonarQube pour l''analyse de code.'
+#       HARBOR_REGISTRY_USER:
+#         required: true
+#         description: 'Nom d''utilisateur pour la connexion à Harbor Registry.'
+#       HARBOR_REGISTRY_PASSWORD:
+#         required: true
+#         description: 'Mot de passe pour la connexion à Harbor Registry.'
+
+#     # Déclare les outputs que ce workflow réutilisable peut fournir
+#     outputs:
+#       app_version:
+#         description: "Version de l'application déterminée et utilisée pour la construction."
+#         value: ${{ jobs.build.outputs.app_version }} # Mappe l'output du job 'build' à l'output du workflow
+
+# env:
+#   RECOLNAT_VERSION: 1.0.0
+#   DOCKER_DRIVER: overlay2
+#   HARBOR_REGISTRY: dfgxr43v.c1.gra9.container-registry.ovh.net/dinsi-oci-images-repo
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     outputs:
+#       app_version: ${{ steps.set-vars.outputs.app_version }}
+#     steps:
+#       - uses: actions/checkout@v4
+
+#       - name: Set app version depending on branch
+#         id: set-vars
+#         run: |
+#           if [[ "${GITHUB_REF_NAME}" == "develop" ]]; then
+#             echo "app_version=dev" >> $GITHUB_OUTPUT
+#           elif [[ "${GITHUB_REF_NAME}" == "staging" ]]; then
+#             echo "app_version=rc" >> $GITHUB_OUTPUT
+#           elif [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+#             echo "app_version=prod" >> $GITHUB_OUTPUT
+#           else
+#             echo "app_version=${GITHUB_REF_NAME}-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+#           fi
+# # ##
+#       - name: Override Maven settings.xml (force Maven Central)
+#         run: |
+#           mkdir -p .m2
+#           cat > .m2/settings.xml << 'EOF'
+#           <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+#                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+#                     xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+#                                         https://maven.apache.org/xsd/settings-1.0.0.xsd">
+#             <mirrors>
+#               <mirror>
+#                 <id>central</id>
+#                 <mirrorOf>*</mirrorOf>
+#                 <url>https://repo.maven.apache.org/maven2</url>
+#               </mirror>
+#             </mirrors>
+#           </settings>
+#           EOF
+# # ##
+#       - name: Build with Maven (force Maven Central)
+#         run: |
+#           mvn -s .m2/settings.xml --batch-mode -Dmaven.repo.local=.m2/repository \
+#             -Drevision=${{ steps.set-vars.outputs.app_version }} clean install -f ./pom.xml
+
+#   docker-build:
+#     runs-on: ubuntu-latest
+#     needs: [build]
+#     outputs:
+#       app_version: ${{ needs.build.outputs.app_version }}
+#     steps:
+#       - uses: actions/checkout@v4
+
+#       - name: Build Docker Image (no push)
+#         run: |
+#           docker build -t backend:${{ needs.build.outputs.app_version }} .
+
+#       - name: Save Docker Image as artifact
+#         run: |
+#           docker save backend:${{ needs.build.outputs.app_version }} -o image.tar
+
+#       - name: Upload Docker image artifact
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: backend-image
+#           path: image.tar
+
+#   docker-publish:
+#     runs-on: ubuntu-latest
+#     needs: [docker-build]
+#     steps:
+#       - name: Download Docker image artifact
+#         uses: actions/download-artifact@v4
+#         with:
+#           name: backend-image
+#           path: .
+
+#       - name: Load Docker image
+#         run: |
+#           docker load -i image.tar
+
+#       - name: Docker login to Harbor
+#         run: |
+#           docker login ${{ env.HARBOR_REGISTRY }}/recolnat/ \
+#             -u '${{ secrets.HARBOR_REGISTRY_USER }}' \
+#             -p '${{ secrets.HARBOR_REGISTRY_PASSWORD }}'
+
+#       - name: Tag and push Docker Image
+#         run: |
+#           docker tag backend:${{ needs.docker-build.outputs.app_version }} \
+#             ${{ env.HARBOR_REGISTRY }}/recolnat/backend:${{ needs.docker-build.outputs.app_version }}
+#           docker push ${{ env.HARBOR_REGISTRY }}/recolnat/backend:${{ needs.docker-build.outputs.app_version }}
+
+name: CI/CD Pipeline
+
 on:
   push:
     branches:
@@ -117,130 +252,90 @@ on:
     branches:
       - develop
       - main
-  workflow_call:
-    # Déclare les inputs que ce workflow réutilisable attend
-    inputs:
-      project_ci:
-        required: true
-        type: string
-        description: 'Nom du projet CI (ex: Recolnat-explorer)'
-
-    # Déclare les secrets que ce workflow réutilisable attend
-    secrets:
-      SONAR_TOKEN:
-        required: true
-        description: 'Token SonarQube pour l''analyse de code.'
-      HARBOR_REGISTRY_USER:
-        required: true
-        description: 'Nom d''utilisateur pour la connexion à Harbor Registry.'
-      HARBOR_REGISTRY_PASSWORD:
-        required: true
-        description: 'Mot de passe pour la connexion à Harbor Registry.'
-
-    # Déclare les outputs que ce workflow réutilisable peut fournir
-    outputs:
-      app_version:
-        description: "Version de l'application déterminée et utilisée pour la construction."
-        value: ${{ jobs.build.outputs.app_version }} # Mappe l'output du job 'build' à l'output du workflow
 
 env:
-  RECOLNAT_VERSION: 1.0.0
+  MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
   DOCKER_DRIVER: overlay2
-  HARBOR_REGISTRY: dfgxr43v.c1.gra9.container-registry.ovh.net/dinsi-oci-images-repo
+  RECOLNAT_VERSION: 1.0.0
+  APP_VERSION: ""
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    outputs:
-      app_version: ${{ steps.set-vars.outputs.app_version }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Set app version depending on branch
-        id: set-vars
-        run: |
-          if [[ "${GITHUB_REF_NAME}" == "develop" ]]; then
-            echo "app_version=dev" >> $GITHUB_OUTPUT
-          elif [[ "${GITHUB_REF_NAME}" == "staging" ]]; then
-            echo "app_version=rc" >> $GITHUB_OUTPUT
-          elif [[ "${GITHUB_REF_NAME}" == "main" ]]; then
-            echo "app_version=prod" >> $GITHUB_OUTPUT
-          else
-            echo "app_version=${GITHUB_REF_NAME}-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
-          fi
-# ##
-      - name: Override Maven settings.xml (force Maven Central)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Configure Maven settings for Nexus
         run: |
           mkdir -p .m2
-          cat > .m2/settings.xml << 'EOF'
+          cat > .m2/settings.xml <<EOF
           <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                     xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
                                         https://maven.apache.org/xsd/settings-1.0.0.xsd">
-            <mirrors>
-              <mirror>
-                <id>central</id>
-                <mirrorOf>*</mirrorOf>
-                <url>https://repo.maven.apache.org/maven2</url>
-              </mirror>
-            </mirrors>
+            <servers>
+              <server>
+                <id>nexus</id>
+                <username>${{ secrets.NEXUS_USERNAME }}</username>
+                <password>${{ secrets.NEXUS_PASSWORD }}</password>
+              </server>
+            </servers>
           </settings>
           EOF
 
-      - name: Build with Maven (use overridden settings.xml)
+      - name: Set app version
         run: |
-          mvn -s .m2/settings.xml --batch-mode -Dmaven.repo.local=.m2/repository \
-            -Drevision=${{ steps.set-vars.outputs.app_version }} clean install -f ./pom.xml
-# ##
-      - name: Build with Maven (force Maven Central)
-        run: |
-          mvn -s .m2/settings.xml --batch-mode -Dmaven.repo.local=.m2/repository \
-            -Drevision=${{ steps.set-vars.outputs.app_version }} clean install -f ./pom.xml
+          if [[ "${{ github.ref_name }}" == "develop" ]]; then
+            echo "APP_VERSION=dev" >> $GITHUB_ENV
+          elif [[ "${{ github.ref_name }}" == "staging" ]]; then
+            echo "APP_VERSION=rc" >> $GITHUB_ENV
+          elif [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "APP_VERSION=prod" >> $GITHUB_ENV
+          else
+            echo "APP_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+          fi
 
-  docker-build:
+      - name: Build with Maven
+        run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean install -f ./pom.xml
+
+  sonarqube:
     runs-on: ubuntu-latest
-    needs: [build]
-    outputs:
-      app_version: ${{ needs.build.outputs.app_version }}
+    needs: build
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Build Docker Image (no push)
-        run: |
-          docker build -t backend:${{ needs.build.outputs.app_version }} .
-
-      - name: Save Docker Image as artifact
-        run: |
-          docker save backend:${{ needs.build.outputs.app_version }} -o image.tar
-
-      - name: Upload Docker image artifact
-        uses: actions/upload-artifact@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
         with:
-          name: backend-image
-          path: image.tar
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Run SonarQube analysis
+        run: mvn sonar:sonar \
+          -Dsonar.projectKey=${{ secrets.PROJECT_CI }} \
+          -Dsonar.projectName=${{ secrets.PROJECT_CI }} \
+          -Dsonar.host.url=https://dinsi-sonarqube.mnhn.fr \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
   docker-publish:
     runs-on: ubuntu-latest
-    needs: [docker-build]
+    needs: build
     steps:
-      - name: Download Docker image artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: backend-image
-          path: .
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Load Docker image
+      - name: Build and publish Docker image
         run: |
-          docker load -i image.tar
-
-      - name: Docker login to Harbor
-        run: |
-          docker login ${{ env.HARBOR_REGISTRY }}/recolnat/ \
-            -u '${{ secrets.HARBOR_REGISTRY_USER }}' \
-            -p '${{ secrets.HARBOR_REGISTRY_PASSWORD }}'
-
-      - name: Tag and push Docker Image
-        run: |
-          docker tag backend:${{ needs.docker-build.outputs.app_version }} \
-            ${{ env.HARBOR_REGISTRY }}/recolnat/backend:${{ needs.docker-build.outputs.app_version }}
-          docker push ${{ env.HARBOR_REGISTRY }}/recolnat/backend:${{ needs.docker-build.outputs.app_version }}
+          docker build -t nexus-repo/backend:${{ env.APP_VERSION }} .
+          docker tag nexus-repo/backend:${{ env.APP_VERSION }} ${{ secrets.NEXUS_URL }}/backend:${{ env.APP_VERSION }}
+          echo "${{ secrets.NEXUS_PASSWORD }}" | docker login ${{ secrets.NEXUS_URL }} --username ${{ secrets.NEXUS_USERNAME }} --password-stdin
+          docker push ${{ secrets.NEXUS_URL }}/backend:${{ env.APP_VERSION }}
