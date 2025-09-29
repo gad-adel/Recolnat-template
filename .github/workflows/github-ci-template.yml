@@ -258,7 +258,6 @@ on:
       project_ci:
         required: true
         type: string
-        description: 'Nom du projet CI (ex: Recolnat-explorer)'
     secrets:
       SONAR_TOKEN:
         required: true
@@ -296,24 +295,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Configure Maven settings for Nexus
-        run: |
-          mkdir -p .m2
-          cat > .m2/settings.xml <<EOF
-          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
-                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
-                                        https://maven.apache.org/xsd/settings-1.0.0.xsd">
-            <servers>
-              <server>
-                <id>nexus</id>
-                <username>${{ secrets.NEXUS_USERNAME }}</username>
-                <password>${{ secrets.NEXUS_PASSWORD }}</password>
-              </server>
-            </servers>
-          </settings>
-          EOF
-
       - name: Set app version
         run: |
           if [[ "${{ github.ref_name }}" == "develop" ]]; then
@@ -344,6 +325,7 @@ jobs:
 
       - name: Run SonarQube analysis
         run: mvn sonar:sonar \
+          -Drevision=${{ env.APP_VERSION }} \
           -Dsonar.projectKey=${{ secrets.PROJECT_CI }} \
           -Dsonar.projectName=${{ secrets.PROJECT_CI }} \
           -Dsonar.host.url=https://dinsi-sonarqube.mnhn.fr \
