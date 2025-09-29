@@ -73,9 +73,9 @@ jobs:
       - name: Verify /etc/hosts
         run: cat /etc/hosts
 
-      # Debug: Test DNS resolution
-      - name: Test DNS resolution
-        run: nslookup dinsi-nexus.mnhn.cloud
+      # # Debug: Test DNS resolution
+      # - name: Test DNS resolution
+      #   run: nslookup dinsi-nexus.mnhn.cloud
 
       # Debug: Test connectivity to Nexus
       - name: Test connectivity to Nexus
