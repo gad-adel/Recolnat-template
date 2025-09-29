@@ -65,6 +65,10 @@ jobs:
             echo "APP_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
           fi
 
+      - name: Map Nexus domain in /etc/hosts
+        run: |
+            echo "51.210.167.37 dinsi-nexus.mnhn.cloud" | sudo tee -a /etc/hosts
+
       - name: Build with Maven
         run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean install -f ./pom.xml
 
