@@ -69,6 +69,18 @@ jobs:
         run: |
             echo "51.210.167.37 dinsi-nexus.mnhn.cloud" | sudo tee -a /etc/hosts
 
+      # Debug: Verify /etc/hosts
+      - name: Verify /etc/hosts
+        run: cat /etc/hosts
+
+      # Debug: Test DNS resolution
+      - name: Test DNS resolution
+        run: nslookup dinsi-nexus.mnhn.cloud
+
+      # Debug: Test connectivity to Nexus
+      - name: Test connectivity to Nexus
+        run: curl -I https://dinsi-nexus.mnhn.cloud
+            
       - name: Build with Maven
         run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean install -f ./pom.xml
 
