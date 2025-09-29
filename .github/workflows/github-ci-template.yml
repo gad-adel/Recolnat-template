@@ -89,6 +89,10 @@ jobs:
       - name: Test connectivity to Nexus
         run: curl -I https://dinsi-nexus.mnhn.cloud
             
+      - name: Add Nexus certificate to JDK keystore
+        run: |
+          sudo keytool -import -trustcacerts -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt -alias nexus-cert -file nexus-cert.pem
+
       - name: Build with Maven
         run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean install -f ./pom.xml
 
