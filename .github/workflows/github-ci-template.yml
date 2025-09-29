@@ -71,7 +71,7 @@ jobs:
 
       - name: Add Nexus certificate to trust store
         run: |
-          sudo cp ../nexus-cert.pem /usr/local/share/ca-certificates/nexus-cert.crt
+          sudo cp ./nexus-cert.pem /usr/local/share/ca-certificates/nexus-cert.crt
           sudo update-ca-certificates
       # Debug: Verify /etc/hosts
       - name: Verify /etc/hosts
