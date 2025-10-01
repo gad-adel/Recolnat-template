@@ -95,7 +95,10 @@ jobs:
 
       - name: Debug APP_VERSION 1
         run: echo "APP_VERSION=${{ env.APP_VERSION }}"
-
+      
+      - name: Debug Maven Command
+        run: echo "mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean install -f ./pom.xml"
+      
       - name: Build with Maven
         run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean install -f ./pom.xml
 
