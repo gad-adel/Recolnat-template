@@ -93,6 +93,9 @@ jobs:
         run: |
           sudo keytool -import -trustcacerts -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt -alias nexus-cert -file nexus-cert.pem
 
+      - name: Debug APP_VERSION 1
+        run: echo "APP_VERSION=${{ env.APP_VERSION }}"
+
       - name: Build with Maven
         run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean install -f ./pom.xml
 
@@ -108,6 +111,9 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+
+      - name: Debug APP_VERSION 2
+        run: echo "APP_VERSION=${{ env.APP_VERSION }}"
 
       - name: Run SonarQube analysis
         run: mvn sonar:sonar \
