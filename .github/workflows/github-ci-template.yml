@@ -180,7 +180,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Download Nexus certificate artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v3.1.0
         with:
           name: nexus-cert
 
