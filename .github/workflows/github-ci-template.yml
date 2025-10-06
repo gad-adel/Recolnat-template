@@ -177,7 +177,7 @@ jobs:
             echo | openssl s_client -showcerts -servername dinsi-nexus.mnhn.cloud -connect 51.210.167.37:443 2>/dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > nexus-cert.pem
 
         - name: Save Nexus certificate as artifact
-          uses: actions/upload-artifact@v3
+          uses: actions/upload-artifact@v3.1.0
           with:
             name: nexus-cert
             path: nexus-cert.pem
@@ -208,7 +208,7 @@ jobs:
             distribution: 'temurin'
 
         - name: Download Nexus certificate artifact
-          uses: actions/download-artifact@v3
+          uses: actions/download-artifact@v3.1.0
           with:
             name: nexus-cert
 
