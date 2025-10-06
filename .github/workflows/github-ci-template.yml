@@ -133,6 +133,13 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Test connectivity to Nexus
+        run: curl -I https://dinsi-nexus.mnhn.cloud
+
+      - name: Map Nexus domain in /etc/hosts
+        run: |
+          echo "51.210.167.37 dinsi-nexus.mnhn.cloud" | sudo tee -a /etc/hosts
+
       - name: Set app version
         run: |
           if [[ "${{ github.ref_name }}" == "develop" ]]; then
@@ -147,11 +154,11 @@ jobs:
 
       - name: Publish Docker image with Jib
         env:
-          HARBOR_REGISTRY_USER: ${{ secrets.HARBOR_REGISTRY_USER }}
-          HARBOR_REGISTRY_PASSWORD: ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         run: |
           mvn $MAVEN_CLI_OPTS \
             -Drevision=${{ env.APP_VERSION }} \
-            -Djib.to.auth.username=${{ secrets.HARBOR_REGISTRY_USER }} \
-            -Djib.to.auth.password=${{ secrets.HARBOR_REGISTRY_PASSWORD }} \
-            clean deploy
+            -Djib.to.auth.username=${{ secrets.NEXUS_USERNAME }} \
+            -Djib.to.auth.password=${{ secrets.NEXUS_PASSWORD }} \
+            clean deploy -X
