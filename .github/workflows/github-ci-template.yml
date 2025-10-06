@@ -132,6 +132,10 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      
+      - name: Map Nexus domain in /etc/hosts
+        run: |
+          echo "51.210.167.37 dinsi-nexus.mnhn.cloud" | sudo tee -a /etc/hosts
 
       - name: Test connectivity to Nexus
         run: curl -I https://dinsi-nexus.mnhn.cloud
