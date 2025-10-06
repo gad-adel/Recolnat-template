@@ -35,7 +35,7 @@ on:
     outputs:
       app_version:
         description: "Version de l'application déterminée et utilisée pour la construction."
-        value: ${{ jobs.build.outputs.app_version }} # Mappe l'output du job 'build' à l'output du workflow
+        value: ${{ jobs.build.outputs.app_version }}
 
 env:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
@@ -75,6 +75,9 @@ jobs:
             echo "APP_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
           fi
 
+      - name: Set output app_version
+        run: echo "app_version=${{ env.APP_VERSION }}" >> $GITHUB_OUTPUT
+
       - name: Map Nexus domain in /etc/hosts
         run: |
             echo "51.210.167.37 dinsi-nexus.mnhn.cloud" | sudo tee -a /etc/hosts
@@ -87,37 +90,14 @@ jobs:
         run: |
           sudo cp nexus-cert.pem /usr/local/share/ca-certificates/nexus-cert.crt
           sudo update-ca-certificates
-      # Debug: Verify /etc/hosts
-      - name: Verify /etc/hosts
-        run: cat /etc/hosts
-
-      # # Debug: Test DNS resolution
-      # - name: Test DNS resolution
-      #   run: nslookup dinsi-nexus.mnhn.cloud
-
-      # Debug: Test connectivity to Nexus
-      - name: Test connectivity to Nexus
-        run: curl -I https://dinsi-nexus.mnhn.cloud
             
       - name: Add Nexus certificate to JDK keystore
         run: |
           sudo keytool -import -trustcacerts -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt -alias nexus-cert -file nexus-cert.pem
-
-      - name: Debug APP_VERSION 1
-        run: echo "APP_VERSION=${{ env.APP_VERSION }}"
       
-      - name: Debug Maven Command
-        run: echo "mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean install -f ./pom.xml"
-
-      - name: Echo
-        run: echo "TEST"
-
-      - name: Verify POM file 
-        run: ls -l ./pom.xml
-
       - name: Build with Maven
         run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean install -f ${{ inputs.pom_path }}
-
+      
   # sonarqube:
   #   runs-on: ubuntu-latest
   #   needs: build
