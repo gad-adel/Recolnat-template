@@ -419,6 +419,9 @@ jobs:
           sudo update-ca-certificates
           sudo keytool -import -trustcacerts -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt -alias nexus-cert -file nexus-cert.pem
 
+      - name: Debug APP_VERSION build 
+        run: echo "APP_VERSION=${{ env.APP_VERSION }}"
+
       - name: Build with Maven
         run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean install -f ./pom.xml
 
@@ -428,6 +431,9 @@ jobs:
     env:
       APP_VERSION: ${{ needs.build.outputs.app_version }}
     steps:
+      - name: Debug APP_VERSION publish
+        run: echo "APP_VERSION=${{ env.APP_VERSION }}"
+
       - name: Checkout code
         uses: actions/checkout@v4
       
