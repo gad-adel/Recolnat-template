@@ -11,15 +11,10 @@ on:
       - develop
       - main
   workflow_call:
-    # Déclare les inputs que ce workflow réutilisable attend
     inputs:
       project_ci:
         required: true
         type: string
-      pom_path:
-        required: true
-        type: string
-        default: './pom.xml'
     secrets:
       SONAR_TOKEN:
         required: true
@@ -31,7 +26,6 @@ on:
         required: true
         description: 'Mot de passe pour la connexion à Harbor Registry.'
 
-    # Déclare les outputs que ce workflow réutilisable peut fournir
     outputs:
       app_version:
         description: "Version de l'application déterminée et utilisée pour la construction."
@@ -45,12 +39,6 @@ env:
   APP_VERSION: "prod"
 
 jobs:
-  call-template:
-    uses: ./github-ci-template.yml
-    with:
-      project_ci: my-project
-      pom_path: ./pom.xml
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -75,9 +63,6 @@ jobs:
             echo "APP_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
           fi
 
-      - name: Set output app_version
-        run: echo "app_version=${{ env.APP_VERSION }}" >> $GITHUB_OUTPUT
-
       - name: Map Nexus domain in /etc/hosts
         run: |
             echo "51.210.167.37 dinsi-nexus.mnhn.cloud" | sudo tee -a /etc/hosts
@@ -94,10 +79,10 @@ jobs:
       - name: Add Nexus certificate to JDK keystore
         run: |
           sudo keytool -import -trustcacerts -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt -alias nexus-cert -file nexus-cert.pem
-      
+
       - name: Build with Maven
-        run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean install -f ${{ inputs.pom_path }}
-      
+        run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean install -f ./pom.xml
+
   # sonarqube:
   #   runs-on: ubuntu-latest
   #   needs: build
