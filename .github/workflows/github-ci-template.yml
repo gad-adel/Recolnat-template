@@ -16,6 +16,10 @@ on:
       project_ci:
         required: true
         type: string
+      pom_path:
+        required: true
+        type: string
+        default: './pom.xml'
     secrets:
       SONAR_TOKEN:
         required: true
@@ -41,6 +45,12 @@ env:
   APP_VERSION: "prod"
 
 jobs:
+  call-template:
+    uses: ./github-ci-template.yml
+    with:
+      project_ci: my-project
+      pom_path: ./pom.xml
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -106,7 +116,7 @@ jobs:
         run: ls -l ./pom.xml
 
       - name: Build with Maven
-        run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean install -f ./pom.xml
+        run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean install -f ${{ inputs.pom_path }}
 
   # sonarqube:
   #   runs-on: ubuntu-latest
