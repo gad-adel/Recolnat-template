@@ -175,7 +175,9 @@ jobs:
         - name: Generate and add Nexus certificate to trust store
           run: |
             echo | openssl s_client -showcerts -servername dinsi-nexus.mnhn.cloud -connect 51.210.167.37:443 2>/dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > nexus-cert.pem
-
+            sudo keytool -import -trustcacerts -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt -alias nexus-cert -file nexus-cert.pem
+            sudo keytool -list -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit
+            
         - name: Cache Nexus certificate
           uses: actions/cache@v3
           with:
