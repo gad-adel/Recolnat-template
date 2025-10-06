@@ -232,17 +232,11 @@ on:
       SONAR_TOKEN:
         required: true
         description: 'Token SonarQube pour l''analyse de code.'
-      NEXUS_USERNAME:
-        required: true
-        description: 'Nom d''utilisateur pour la connexion à Nexus.'
-      NEXUS_PASSWORD:
-        required: true
-        description: 'Mot de passe pour la connexion à Nexus.'
 
-    outputs:
-      app_version:
-        description: "Version de l'application déterminée et utilisée pour la construction."
-        value: ${{ jobs.build.outputs.app_version }}
+    # outputs:
+    #   app_version:
+    #     description: "Version de l'application déterminée et utilisée pour la construction."
+    #     value: ${{ jobs.build.outputs.app_version }}
 # name: CI/CD Pipeline
 
 # on:
@@ -261,9 +255,8 @@ env:
   APP_VERSION: ""
 
 jobs:
-  build-dev:
+  build:
     runs-on: ubuntu-latest
-    if: github.ref_name == 'develop'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -275,111 +268,54 @@ jobs:
           distribution: 'temurin'
 
       - name: Set app version
-        run: echo "APP_VERSION=dev" >> $GITHUB_ENV
+        run: |
+          if [[ "${{ github.ref_name }}" == "develop" ]]; then
+            echo "APP_VERSION=dev" >> $GITHUB_ENV
+          elif [[ "${{ github.ref_name }}" == "staging" ]]; then
+            echo "APP_VERSION=rc" >> $GITHUB_ENV
+          elif [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "APP_VERSION=prod" >> $GITHUB_ENV
+          else
+            echo "APP_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+          fi
 
-      - name: Compile the code
+      - name: Map Nexus domain in /etc/hosts
+        run: |
+          echo "51.210.167.37 dinsi-nexus.mnhn.cloud" | sudo tee -a /etc/hosts
+
+      - name: Generate and add Nexus certificate to trust store
+        run: |
+          echo | openssl s_client -showcerts -servername dinsi-nexus.mnhn.cloud -connect 51.210.167.37:443 2>/dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > nexus-cert.pem
+          sudo cp nexus-cert.pem /usr/local/share/ca-certificates/nexus-cert.crt
+          sudo update-ca-certificates
+          sudo keytool -import -trustcacerts -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt -alias nexus-cert -file nexus-cert.pem
+
+      - name: Build with Maven
         run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean install -f ./pom.xml
-
-  build-staging:
+  publish:
     runs-on: ubuntu-latest
-    if: github.ref_name == 'staging'
+    needs: build
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+      
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
-
-      - name: Set app version
-        run: echo "APP_VERSION=rc" >> $GITHUB_ENV
-
-      - name: Compile the code
-        run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean install -f ./pom.xml
-
-  build-prod:
-    runs-on: ubuntu-latest
-    if: github.ref_name == 'main'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Set app version
-        run: echo "APP_VERSION=prod" >> $GITHUB_ENV
-
-      - name: Compile the code
-        run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean install -f ./pom.xml
-
-  docker-publish-dev:
-    runs-on: ubuntu-latest
-    if: github.ref_name == 'develop'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Set app version
-        run: echo "APP_VERSION=dev" >> $GITHUB_ENV
-
+      
+      - name: Map Nexus domain in /etc/hosts
+        run: |
+          echo "51.210.167.37 dinsi-nexus.mnhn.cloud" | sudo tee -a /etc/hosts
+      
       - name: Publish Docker image
         env:
-          RECOLNAT_REGISTRY_USER: ${{ secrets.NEXUS_USERNAME }}
-          RECOLNAT_REGISTRY_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-        run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean deploy -DskipTests -f ./pom.xml
-
-  docker-publish-staging:
-    runs-on: ubuntu-latest
-    if: github.ref_name == 'staging'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Set app version
-        run: echo "APP_VERSION=rc" >> $GITHUB_ENV
-
-      - name: Publish Docker image
-        env:
-          RECOLNAT_REGISTRY_USER: ${{ secrets.NEXUS_USERNAME }}
-          RECOLNAT_REGISTRY_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-        run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean deploy -DskipTests -f ./pom.xml
-
-  docker-publish-prod:
-    runs-on: ubuntu-latest
-    if: github.ref_name == 'main'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Set app version
-        run: echo "APP_VERSION=prod" >> $GITHUB_ENV
-
-      - name: Publish Docker image
-        env:
-          RECOLNAT_REGISTRY_USER: ${{ secrets.NEXUS_USERNAME }}
-          RECOLNAT_REGISTRY_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-        run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean deploy -DskipTests -f ./pom.xml
+          NEXUS_USERNAME: ${{ secrets.HARBOR_REGISTRY_USER }}
+          NEXUS_PASSWORD: ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
+        run: |
+          mvn $MAVEN_CLI_OPTS \
+          -Drevision=${{ env.APP_VERSION }} \
+          -Djib.to.auth.username=${{ secrets.NEXUS_USERNAME }} \
+          -Djib.to.auth.password=${{ secrets.NEXUS_PASSWORD }} \
+          clean deploy -DskipTests -f ./pom.xml
