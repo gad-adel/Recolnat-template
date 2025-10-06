@@ -208,6 +208,8 @@
 #               -Djib.to.auth.username=${{ secrets.NEXUS_USERNAME }} \
 #               -Djib.to.auth.password=${{ secrets.NEXUS_PASSWORD }} \
 #               clean deploy -X
+
+
 name: CI/CD Pipeline
 
 on:
@@ -216,7 +218,40 @@ on:
       - develop
       - staging
       - main
-  workflow_dispatch:
+  pull_request:
+    branches:
+      - develop
+      - main
+  # workflow_dispatch:
+  workflow_call:
+    inputs:
+      project_ci:
+        required: true
+        type: string
+    secrets:
+      SONAR_TOKEN:
+        required: true
+        description: 'Token SonarQube pour l''analyse de code.'
+      NEXUS_USERNAME:
+        required: true
+        description: 'Nom d''utilisateur pour la connexion à Nexus.'
+      NEXUS_PASSWORD:
+        required: true
+        description: 'Mot de passe pour la connexion à Nexus.'
+
+    outputs:
+      app_version:
+        description: "Version de l'application déterminée et utilisée pour la construction."
+        value: ${{ jobs.build.outputs.app_version }}
+# name: CI/CD Pipeline
+
+# on:
+#   push:
+#     branches:
+#       - develop
+#       - staging
+#       - main
+#   workflow_dispatch:
 
 env:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
