@@ -98,7 +98,10 @@ jobs:
       
       - name: Debug Maven Command
         run: echo "mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean install -f ./pom.xml"
-      
+
+      - name: Verify POM file 
+        run: ls -l ./pom.xml
+
       - name: Build with Maven
         run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean install -f ./pom.xml
 
