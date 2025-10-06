@@ -200,8 +200,8 @@ jobs:
 
         - name: Publish Docker image with Jib
           env:
-            NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-            NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+            RECOLNAT_REGISTRY_USER: ${{ secrets.NEXUS_USERNAME }}
+            RECOLNAT_REGISTRY_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
           run: |
             mvn -s .m2/settings.xml $MAVEN_CLI_OPTS \
               -Drevision=${{ env.APP_VERSION }} \
