@@ -381,31 +381,36 @@ jobs:
           distribution: 'temurin'
 
       # - name: Set app version
+      #   id: set-version
       #   run: |
       #     if [[ "${{ github.ref_name }}" == "develop" ]]; then
       #       echo "APP_VERSION=dev" >> $GITHUB_ENV
+      #       echo "::set-output name=app_version::dev"
       #     elif [[ "${{ github.ref_name }}" == "staging" ]]; then
       #       echo "APP_VERSION=rc" >> $GITHUB_ENV
+      #       echo "::set-output name=app_version::rc"
       #     elif [[ "${{ github.ref_name }}" == "main" ]]; then
       #       echo "APP_VERSION=prod" >> $GITHUB_ENV
+      #       echo "::set-output name=app_version::prod"
       #     else
       #       echo "APP_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+      #       echo "::set-output name=app_version::${{ github.ref_name }}"
       #     fi
       - name: Set app version
         id: set-version
         run: |
           if [[ "${{ github.ref_name }}" == "develop" ]]; then
             echo "APP_VERSION=dev" >> $GITHUB_ENV
-            echo "::set-output name=app_version::dev"
+            echo "app_version=dev" >> $GITHUB_OUTPUT
           elif [[ "${{ github.ref_name }}" == "staging" ]]; then
             echo "APP_VERSION=rc" >> $GITHUB_ENV
-            echo "::set-output name=app_version::rc"
+            echo "app_version=rc" >> $GITHUB_OUTPUT
           elif [[ "${{ github.ref_name }}" == "main" ]]; then
             echo "APP_VERSION=prod" >> $GITHUB_ENV
-            echo "::set-output name=app_version::prod"
+            echo "app_version=prod" >> $GITHUB_OUTPUT
           else
             echo "APP_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
-            echo "::set-output name=app_version::${{ github.ref_name }}"
+            echo "app_version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Map Nexus domain in /etc/hosts
