@@ -93,10 +93,11 @@ jobs:
     needs: build
     env:
       APP_VERSION: ${{ needs.build.outputs.app_version }}
-      HARBOR_URL: ${{ needs.build.outputs.HARBOR_URL }}
+      # HARBOR_URL: ${{ env.RECOLNAT_REGISTRY }}/recolnat/explorer
+      RECOLNAT_REGISTRY: dfgxr43v.c1.gra9.container-registry.ovh.net/dinsi-oci-images-repo/explorer
     steps:
       - name: Debug HARBOR_URL
-        run: echo "HARBOR_URL=${{ env.HARBOR_URL }}"
+        run: echo "HARBOR_URL=${{ env.RECOLNAT_REGISTRY }}"
 
       - name: Debug APP_VERSION publish
         run: echo "APP_VERSION=${{ env.APP_VERSION }}"
@@ -123,7 +124,7 @@ jobs:
 
       - name: Publish image
         env:
-          HARBOR_URL: ${{ env.RECOLNAT_REGISTRY }}/dinsi/explorer
+          RECOLNAT_REGISTRY: ${{ env.RECOLNAT_REGISTRY }}
           HARBOR_REGISTRY_USER: ${{secrets.HARBOR_REGISTRY_USER }}
           HARBOR_REGISTRY_PASSWORD: ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
         run: |
