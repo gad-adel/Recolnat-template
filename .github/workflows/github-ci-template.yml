@@ -123,12 +123,13 @@ jobs:
 
       - name: Publish image
         env:
-          HARBOR_URL: ${{ env.RECOLNAT_REGISTRY }}/recolnat/explorer:${{ needs.build.outputs.tag }}
+          HARBOR_URL: ${{ env.RECOLNAT_REGISTRY }}/dinsi/explorer
           HARBOR_REGISTRY_USER: ${{secrets.HARBOR_REGISTRY_USER }}
           HARBOR_REGISTRY_PASSWORD: ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
         run: |
           mvn $MAVEN_CLI_OPTS \
           -Drevision=${{ env.APP_VERSION }} \
+          -Denv.harbor_url=${{ env.RECOLNAT_REGISTRY }} \
           -Djib.to.auth.username=${{ secrets.HARBOR_REGISTRY_USER }} \
           -Djib.to.auth.password=${{ secrets.HARBOR_REGISTRY_PASSWORD }} \
           clean deploy -DskipTests -f ./pom.xml
