@@ -25,6 +25,12 @@ on:
       NEXUS_PASSWORD:
         required: true
         description: 'Mot de passe pour la connexion à Nexus.'
+      HARBOR_REGISTRY_USER:
+        required: true
+        description: 'Nom d''utilisateur pour la connexion au registre Harbor.'
+      HARBOR_REGISTRY_PASSWORD:
+        required: true
+        description: 'Mot de passe pour la connexion au registre Harbor.'
 
 env:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
@@ -124,12 +130,12 @@ jobs:
       - name: Publish image
         env:
           RECOLNAT_REGISTRY: ${{ env.RECOLNAT_REGISTRY }}
-          HARBOR_REGISTRY_USER: ${{secrets.HARBOR_REGISTRY_USER }}
-          HARBOR_REGISTRY_PASSWORD: ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
+          HARBOR_REGISTRY_USER: ${{env.HARBOR_REGISTRY_USER }}
+          HARBOR_REGISTRY_PASSWORD: ${{ env.HARBOR_REGISTRY_PASSWORD }}
         run: |
           mvn $MAVEN_CLI_OPTS \
           -Drevision=${{ env.APP_VERSION }} \
           -Denv.harbor_url=${{ env.RECOLNAT_REGISTRY }} \
-          -Djib.to.auth.username=${{ secrets.HARBOR_REGISTRY_USER }} \
-          -Djib.to.auth.password=${{ secrets.HARBOR_REGISTRY_PASSWORD }} \
+          -Djib.to.auth.username=${{ env.HARBOR_REGISTRY_USER }} \
+          -Djib.to.auth.password=${{ env.HARBOR_REGISTRY_PASSWORD }} \
           clean deploy -DskipTests -f ./pom.xml
