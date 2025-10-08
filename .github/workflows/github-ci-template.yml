@@ -126,7 +126,13 @@ jobs:
           sudo cp nexus-cert.pem /usr/local/share/ca-certificates/nexus-cert.crt
           sudo update-ca-certificates
           sudo keytool -import -trustcacerts -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt -alias nexus-cert -file nexus-cert.pem
-
+      - name: debug harbor env
+        env:
+          HARBOR_REGISTRY_USER: ${{env.HARBOR_REGISTRY_USER }}
+          HARBOR_REGISTRY_PASSWORD: ${{ env.HARBOR_REGISTRY_PASSWORD }}
+        run: |
+          echo "HARBOR_REGISTRY_USER=${{ env.HARBOR_REGISTRY_USER }}"
+          echo "HARBOR_REGISTRY_PASSWORD=${{ env.HARBOR_REGISTRY_PASSWORD }}"
       - name: Publish image
         env:
           RECOLNAT_REGISTRY: ${{ env.RECOLNAT_REGISTRY }}
