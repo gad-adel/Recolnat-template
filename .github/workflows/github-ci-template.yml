@@ -146,6 +146,7 @@ jobs:
       - name: Publish image
         env:
           RECOLNAT_REGISTRY: ${{ env.RECOLNAT_REGISTRY }}
+          APP_VERSION: ${{ env.APP_VERSION }}
         run: |
           mvn $MAVEN_CLI_OPTS \
           -Drevision=${{ env.APP_VERSION }} \
