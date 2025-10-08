@@ -141,11 +141,11 @@ jobs:
         run: |
           echo "HARBOR_REGISTRY_USER=${{ secrets.HARBOR_REGISTRY_USER }}"
           echo "HARBOR_REGISTRY_PASSWORD=${{ secrets.HARBOR_REGISTRY_PASSWORD }}"
+          echo "Raw HARBOR_REGISTRY_USER=${{ secrets.HARBOR_REGISTRY_USER }}"
+          mvn help:effective-settings -s .m2/settings.xml
       - name: Publish image
         env:
           RECOLNAT_REGISTRY: ${{ env.RECOLNAT_REGISTRY }}
-          HARBOR_REGISTRY_USER: ${{secrets.HARBOR_REGISTRY_USER }}
-          HARBOR_REGISTRY_PASSWORD: ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
         run: |
           mvn $MAVEN_CLI_OPTS \
           -Drevision=${{ env.APP_VERSION }} \
