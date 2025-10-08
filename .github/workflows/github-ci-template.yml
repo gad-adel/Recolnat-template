@@ -144,8 +144,8 @@ jobs:
       - name: Publish image
         env:
           RECOLNAT_REGISTRY: ${{ env.RECOLNAT_REGISTRY }}
-          HARBOR_REGISTRY_USER: ${{env.HARBOR_REGISTRY_USER }}
-          HARBOR_REGISTRY_PASSWORD: ${{ env.HARBOR_REGISTRY_PASSWORD }}
+          HARBOR_REGISTRY_USER: ${{secrets.HARBOR_REGISTRY_USER }}
+          HARBOR_REGISTRY_PASSWORD: ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
         run: |
           mvn $MAVEN_CLI_OPTS \
           -Drevision=${{ env.APP_VERSION }} \
