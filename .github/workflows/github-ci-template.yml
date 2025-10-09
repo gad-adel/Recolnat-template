@@ -155,6 +155,11 @@ jobs:
           echo "HARBOR_URL=${{ env.RECOLNAT_REGISTRY }}"
           echo "HARBOR_REGISTRY_USER='${{ secrets.HARBOR_REGISTRY_USER }}'"
           echo "HARBOR_REGISTRY_PASSWORD=${{ secrets.HARBOR_REGISTRY_PASSWORD }}"
+
+      - name: test docker login
+        run: |
+          docker login ${{ env.RECOLNAT_REGISTRY }} -u '${{ secrets.HARBOR_REGISTRY_USER }}' -p '${{ secrets.HARBOR_REGISTRY_PASSWORD }}'
+
       - name: Publish image
         env:
           RECOLNAT_REGISTRY: ${{ env.RECOLNAT_REGISTRY }}
