@@ -16,6 +16,9 @@ on:
         required: true
         type: string
     secrets:
+      SONAR_TOKEN:
+        required: true
+        description: 'Token SonarQube pour l''analyse de code.'
       HARBOR_REGISTRY_USER:
         required: true
         description: 'Nom d''utilisateur pour la connexion au registre Harbor.'
