@@ -32,7 +32,7 @@ on:
         required: true
         description: 'Mot de passe pour la connexion au registre Harbor.'
       TEST_PASS:
-        required: false
+        required: true
         description: 'Set to "true" to make the build fail if there are test failures.'
 
 env:
