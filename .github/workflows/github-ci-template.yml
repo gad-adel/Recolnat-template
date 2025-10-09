@@ -69,7 +69,7 @@ jobs:
     
       - name: test docker login
         run: |
-          docker login ${{ env.RECOLNAT_REGISTRY }} -u 'robot$recolnat-ci' -p ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
+          docker login ${{ env.RECOLNAT_REGISTRY }} -u '${{ secrets.HARBOR_REGISTRY_USER }}' -p ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
     
       # - name: Publish image
       #   env:
