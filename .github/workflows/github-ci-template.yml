@@ -67,6 +67,10 @@ jobs:
           echo "HARBOR_REGISTRY_USER='${{ secrets.HARBOR_REGISTRY_USER }}'"
           echo "HARBOR_REGISTRY_PASSWORD='${{ secrets.HARBOR_REGISTRY_PASSWORD }}'"
           echo "TEST_PASS='${{ secrets.TEST_PASS }}'"
+      - name: Debug raw secrets
+        run: |
+          echo "Raw TEST_PASS=${{ secrets.TEST_PASS }}"
+          echo "Raw HARBOR_REGISTRY_USER='${{ secrets.HARBOR_REGISTRY_PASSWORD }}'"
     
       - name: test docker login
         run: |
