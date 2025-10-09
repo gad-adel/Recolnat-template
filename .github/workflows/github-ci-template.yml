@@ -143,13 +143,30 @@ jobs:
           echo "HARBOR_REGISTRY_PASSWORD=${{ secrets.HARBOR_REGISTRY_PASSWORD }}"
           echo "Raw HARBOR_REGISTRY_USER=${{ secrets.HARBOR_REGISTRY_USER }}"
           mvn help:effective-settings -s .m2/settings.xml
+
+      - name: debug variables 2
+        run: |
+          echo "RECOLNAT_REGISTRY=${{ env.RECOLNAT_REGISTRY }}"
+          echo "APP_VERSION=${{ env.APP_VERSION }}"
+      - name: debug variables 2
+        env:
+          RECOLNAT_REGISTRY: ${{ env.RECOLNAT_REGISTRY }}
+          APP_VERSION: ${{ env.APP_VERSION }}
+        run: |
+          echo "RECOLNAT_REGISTRY=${{ env.RECOLNAT_REGISTRY }}"
+          echo "APP_VERSION=${{ env.APP_VERSION }}"
+      - name: Debug Maven variables
+        run: |
+          echo "HARBOR_URL=${{ env.RECOLNAT_REGISTRY }}"
+          echo "HARBOR_REGISTRY_USER=${{ secrets.HARBOR_REGISTRY_USER }}"
+          echo "HARBOR_REGISTRY_PASSWORD=${{ secrets.HARBOR_REGISTRY_PASSWORD }}"
       - name: Publish image
         env:
           RECOLNAT_REGISTRY: ${{ env.RECOLNAT_REGISTRY }}
           APP_VERSION: ${{ env.APP_VERSION }}
         run: |
           mvn $MAVEN_CLI_OPTS \
-          -DVERSION=${{ env.APP_VERSION }} \
+          -Drevision=${{ env.APP_VERSION }} \
           -DHARBOR_URL=${{ env.RECOLNAT_REGISTRY }} \
           -DHARBOR_REGISTRY_USER=${{ secrets.HARBOR_REGISTRY_USER }} \
           -DHARBOR_REGISTRY_PASSWORD=${{ secrets.HARBOR_REGISTRY_PASSWORD }} \
