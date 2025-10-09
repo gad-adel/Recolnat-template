@@ -31,9 +31,6 @@ on:
       HARBOR_REGISTRY_PASSWORD:
         required: true
         description: 'Mot de passe pour la connexion au registre Harbor.'
-      TEST_PASS:
-        required: true
-        description: 'Set to "true" to make the build fail if there are test failures.'
 
 env:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
@@ -44,44 +41,6 @@ env:
   RECOLNAT_REGISTRY: dfgxr43v.c1.gra9.container-registry.ovh.net/dinsi-oci-images-repo
 
 jobs:
-  # connexion:
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     APP_VERSION: ${{ needs.build.outputs.app_version }}
-  #     RECOLNAT_REGISTRY: dfgxr43v.c1.gra9.container-registry.ovh.net
-  #   steps:
-  #     - name: debug variables 2
-  #       run: |
-  #         echo "RECOLNAT_REGISTRY=${{ env.RECOLNAT_REGISTRY }}"
-  #         echo "APP_VERSION=${{ env.APP_VERSION }}"
-  #     - name: debug variables 3
-  #       env:
-  #         RECOLNAT_REGISTRY: ${{ env.RECOLNAT_REGISTRY }}
-  #         APP_VERSION: ${{ env.APP_VERSION }}
-  #       run: |
-  #         echo "RECOLNAT_REGISTRY=${{ env.RECOLNAT_REGISTRY }}"
-  #         echo "APP_VERSION=${{ env.APP_VERSION }}"
-  #     - name: Debug Maven variables
-  #       run: |
-  #         echo "HARBOR_URL=${{ env.RECOLNAT_REGISTRY }}"
-  #         echo "HARBOR_REGISTRY_USER='${{ secrets.HARBOR_REGISTRY_USER }}'"
-  #         echo "TEST_PASS= ${{ secrets.TEST_PASS }}"
-
-  #     - name: test docker login
-  #       run: |
-  #         docker login ${{ env.RECOLNAT_REGISTRY }} -u 'robot$recolnat-ci' -p ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
-    
-      # - name: Publish image
-      #   env:
-      #     RECOLNAT_REGISTRY: ${{ env.RECOLNAT_REGISTRY }}
-      #     APP_VERSION: ${{ env.APP_VERSION }}
-      #   run: |
-      #     mvn $MAVEN_CLI_OPTS \
-      #     -Drevision=${{ env.APP_VERSION }} \
-      #     -DHARBOR_URL=${{ env.RECOLNAT_REGISTRY }} \
-      #     -DHARBOR_REGISTRY_USER='${{ secrets.HARBOR_REGISTRY_USER }}' \
-      #     -DHARBOR_REGISTRY_PASSWORD='${{ secrets.HARBOR_REGISTRY_PASSWORD }}' \
-      #     clean deploy -DskipTests -f ./pom.xml
   build:
     runs-on: ubuntu-latest
     outputs:
