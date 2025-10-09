@@ -179,26 +179,10 @@ jobs:
           sudo update-ca-certificates
           sudo keytool -import -trustcacerts -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt -alias nexus-cert -file nexus-cert.pem
 
-      - name: debug variables 2
-        run: |
-          echo "RECOLNAT_REGISTRY=${{ env.RECOLNAT_REGISTRY }}"
-          echo "APP_VERSION=${{ env.APP_VERSION }}"
-      - name: debug variables 3
-        env:
-          RECOLNAT_REGISTRY: ${{ env.RECOLNAT_REGISTRY }}
-          APP_VERSION: ${{ env.APP_VERSION }}
-        run: |
-          echo "RECOLNAT_REGISTRY=${{ env.RECOLNAT_REGISTRY }}"
-          echo "APP_VERSION=${{ env.APP_VERSION }}"
       - name: Debug Maven variables
         run: |
           echo "HARBOR_URL=${{ env.RECOLNAT_REGISTRY }}"
           echo "HARBOR_REGISTRY_USER='${{ secrets.HARBOR_REGISTRY_USER }}'"
-          echo "HARBOR_REGISTRY_PASSWORD=${{ secrets.HARBOR_REGISTRY_PASSWORD }}"
-
-      - name: test docker login
-        run: |
-          docker login ${{ env.RECOLNAT_REGISTRY }} -u '${{ secrets.HARBOR_REGISTRY_USER }}' -p '${{ secrets.HARBOR_REGISTRY_PASSWORD }}'
 
       - name: Publish image
         env:
@@ -208,6 +192,6 @@ jobs:
           mvn $MAVEN_CLI_OPTS \
           -Drevision=${{ env.APP_VERSION }} \
           -DHARBOR_URL=${{ env.RECOLNAT_REGISTRY }} \
-          -DHARBOR_REGISTRY_USER='robot$recolnat-ci' \
-          -DHARBOR_REGISTRY_PASSWORD='${{ secrets.HARBOR_REGISTRY_PASSWORD }}' \
+          -DHARBOR_REGISTRY_USER=robot$recolnat-ci \
+          -DHARBOR_REGISTRY_PASSWORD=${{ secrets.HARBOR_REGISTRY_PASSWORD }} \
           clean deploy -DskipTests -f ./pom.xml
