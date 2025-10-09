@@ -105,14 +105,14 @@ jobs:
     needs: build
     env:
       APP_VERSION: ${{ needs.build.outputs.app_version }}
-      RECOLNAT_REGISTRY: dfgxr43v.c1.gra9.container-registry.ovh.net/dinsi-oci-images-repo/explorer
+      RECOLNAT_REGISTRY: dfgxr43v.c1.gra9.container-registry.ovh.net/dinsi-oci-images-repo
     steps:
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: build-output
 
-      - name: Debug HARBOR_URL
+      - name: Debug HARBOR_URL 1
         run: echo "HARBOR_URL=${{ env.RECOLNAT_REGISTRY }}"
 
       - name: Debug APP_VERSION publish
