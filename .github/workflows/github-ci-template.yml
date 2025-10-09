@@ -62,7 +62,7 @@ jobs:
         run: |
           echo "HARBOR_URL=${{ env.RECOLNAT_REGISTRY }}"
           echo "HARBOR_REGISTRY_USER='${{ secrets.HARBOR_REGISTRY_USER }}'"
-          echo '${{ secrets.HARBOR_REGISTRY_PASSWORD }}' > harbor_password.txt
+          echo "HARBOR_REGISTRY_PASSWORD='${{ secrets.HARBOR_REGISTRY_PASSWORD }}'"
     
       - name: test docker login
         run: |
