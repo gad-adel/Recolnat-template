@@ -74,7 +74,7 @@ jobs:
     
       - name: test forcer
         run: |
-          docker login dfgxr43v.c1.gra9.container-registry.ovh.net -u 'robot$dinsi-utils' -p 'ghqCkIt37G1j6vu6YsgpeZkYLR1g5Z8B'
+          docker login dfgxr43v.c1.gra9.container-registry.ovh.net -u 'robot$recolnat-ci' -p '8WLxvyUbcqkvlYjHNLa4qJprtf9nLurP'
 
       - name: test docker login
         run: |
