@@ -105,7 +105,8 @@ jobs:
     needs: build
     env:
       APP_VERSION: ${{ needs.build.outputs.app_version }}
-      RECOLNAT_REGISTRY: dfgxr43v.c1.gra9.container-registry.ovh.net/dinsi-oci-images-repo
+      RECOLNAT_REGISTRY: dfgxr43v.c1.gra9.container-registry.ovh.net
+      # dinsi-oci-images-repo
     steps:
       - name: Download build artifact
         uses: actions/download-artifact@v4
