@@ -19,6 +19,12 @@ on:
       SONAR_TOKEN:
         required: true
         description: 'Token SonarQube pour l''analyse de code.'
+      NEXUS_USERNAME:
+        required: true
+        description: 'Nom d''utilisateur pour la connexion à Nexus.'
+      NEXUS_PASSWORD:
+        required: true
+        description: 'Mot de passe pour la connexion à Nexus.'
       HARBOR_REGISTRY_USER:
         required: true
         description: 'Nom d''utilisateur pour la connexion au registre Harbor.'
