@@ -65,7 +65,7 @@ jobs:
         run: |
           echo "HARBOR_URL=${{ env.RECOLNAT_REGISTRY }}"
           echo "HARBOR_REGISTRY_USER='${{ secrets.HARBOR_REGISTRY_USER }}'"
-          echo "TEST_PASS='${{ secrets.TEST_PASS }}'"
+          echo "TEST_PASS= ${{ secrets.TEST_PASS }}"
       - name: test docker login
         run: |
           docker login ${{ env.RECOLNAT_REGISTRY }} -u "${{ secrets.TEST_PASS }}" -p ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
