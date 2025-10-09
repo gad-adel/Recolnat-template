@@ -65,17 +65,8 @@ jobs:
         run: |
           echo "HARBOR_URL=${{ env.RECOLNAT_REGISTRY }}"
           echo "HARBOR_REGISTRY_USER='${{ secrets.HARBOR_REGISTRY_USER }}'"
-          echo "HARBOR_REGISTRY_PASSWORD='${{ secrets.HARBOR_REGISTRY_PASSWORD }}'"
           echo "TEST_PASS='${{ secrets.TEST_PASS }}'"
-      - name: Debug raw secrets
-        run: |
-          echo "Raw TEST_PASS=${{ secrets.TEST_PASS }}"
-          echo "Raw HARBOR_REGISTRY_USER='${{ secrets.HARBOR_REGISTRY_PASSWORD }}'"
     
-      - name: test forcer
-        run: |
-          docker login dfgxr43v.c1.gra9.container-registry.ovh.net -u 'robot$recolnat-ci' -p '8WLxvyUbcqkvlYjHNLa4qJprtf9nLurP'
-
       - name: test docker login
         run: |
           docker login ${{ env.RECOLNAT_REGISTRY }} -u 'robot$recolnat-ci' -p ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
