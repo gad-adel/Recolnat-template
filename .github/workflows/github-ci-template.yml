@@ -149,7 +149,7 @@ jobs:
           APP_VERSION: ${{ env.APP_VERSION }}
         run: |
           mvn $MAVEN_CLI_OPTS \
-          -Drevision=${{ env.APP_VERSION }} \
+          -DVERSION=${{ env.APP_VERSION }} \
           -DHARBOR_URL=${{ env.RECOLNAT_REGISTRY }} \
           -DHARBOR_REGISTRY_USER=${{ secrets.HARBOR_REGISTRY_USER }} \
           -DHARBOR_REGISTRY_PASSWORD=${{ secrets.HARBOR_REGISTRY_PASSWORD }} \
