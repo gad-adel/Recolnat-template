@@ -15,22 +15,6 @@ on:
       project_ci:
         required: true
         type: string
-    secrets:
-      SONAR_TOKEN:
-        required: true
-        description: 'Token SonarQube pour l''analyse de code.'
-      NEXUS_USERNAME:
-        required: true
-        description: 'Nom d''utilisateur pour la connexion à Nexus.'
-      NEXUS_PASSWORD:
-        required: true
-        description: 'Mot de passe pour la connexion à Nexus.'
-      HARBOR_REGISTRY_USER:
-        required: true
-        description: 'Nom d''utilisateur pour la connexion au registre Harbor.'
-      HARBOR_REGISTRY_PASSWORD:
-        required: true
-        description: 'Mot de passe pour la connexion au registre Harbor.'
 
 env:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
