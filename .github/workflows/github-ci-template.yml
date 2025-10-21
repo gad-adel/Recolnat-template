@@ -43,7 +43,8 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-
+    env:
+      RECOLNAT_REGISTRY: dfgxr43v.c1.gra9.container-registry.ovh.net/dinsi-oci-images-repo
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -84,13 +85,13 @@ jobs:
         run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean package -DskipTests -f ./pom.xml
 
       - name: Build Docker image
-        run: docker build -t dfgxr43v.c1.gra9.container-registry.ovh.net/dinsi-oci-images-repo:${{ github.sha }} -f Dockerfile .
+        run: docker build -t ${{ env.RECOLNAT_REGISTRY }}/recolnat/explorer:${{ github.sha }} -f Dockerfile .
 
       - name: Log in to Docker registry
         run: docker login dfgxr43v.c1.gra9.container-registry.ovh.net -u 'robot$recolnat-ci' -p ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
 
       - name: Push Docker image
-        run: docker push dfgxr43v.c1.gra9.container-registry.ovh.net/dinsi-oci-images-repo:${{ github.sha }}
+        run: docker push ${{ env.RECOLNAT_REGISTRY }}/recolnat/explorer:${{ github.sha }}
   # build:
   #   runs-on: ubuntu-latest
   #   outputs:
