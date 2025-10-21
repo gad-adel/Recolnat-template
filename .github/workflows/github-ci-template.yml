@@ -54,8 +54,21 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Set app version
+        id: set-version
+        run: |
+          if [[ "${{ github.ref_name }}" == "develop" ]]; then
+            echo "APP_VERSION=dev" >> $GITHUB_ENV
+          elif [[ "${{ github.ref_name }}" == "staging" ]]; then
+            echo "APP_VERSION=rc" >> $GITHUB_ENV
+          elif [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "APP_VERSION=prod" >> $GITHUB_ENV
+          else
+            echo "APP_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+          fi
+
       - name: Build JAR
-        run: mvn clean package -DskipTests
+        run: mvn clean package -DskipTests -Drevision=${{ env.APP_VERSION }} -f ./pom.xml
 
       - name: Build Docker image
         run: docker build -t dfgxr43v.c1.gra9.container-registry.ovh.net/explorer:${{ github.sha }} .
