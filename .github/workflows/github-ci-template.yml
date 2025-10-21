@@ -68,20 +68,7 @@ jobs:
           else
             echo "APP_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
           fi
-      # - name: Print working directory
-      #   run: pwd
 
-      # - name: List files 1
-      #   run: ls -la
-
-      # - name: Change to repository root
-      #   run: cd $GITHUB_WORKSPACE
-
-      # - name: Print working directory 2
-      #   run: pwd 
-
-      # - name: List files 2
-      #   run: ls -la
       - name: Map Nexus domain in /etc/hosts
         run: |
           echo "51.210.167.37 dinsi-nexus.mnhn.cloud" | sudo tee -a /etc/hosts
@@ -97,7 +84,7 @@ jobs:
         run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean package -DskipTests -f ./pom.xml
 
       - name: Build Docker image
-        run: docker build -t dfgxr43v.c1.gra9.container-registry.ovh.net/explorer:${{ github.sha }} -f Dockerfile .
+        run: docker build -t dfgxr43v.c1.gra9.container-registry.ovh.net:${{ github.sha }} -f Dockerfile .
 
       - name: Log in to Docker registry
         run: docker login dfgxr43v.c1.gra9.container-registry.ovh.net -u 'robot$recolnat-ci' -p ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
