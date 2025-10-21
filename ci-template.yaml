@@ -102,8 +102,6 @@ sonarqube-track:
     - main
     - develop
 
-
-
 docker-publish-dev:
   stage: docker-publish
   script:
