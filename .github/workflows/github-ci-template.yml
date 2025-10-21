@@ -68,6 +68,12 @@ jobs:
           fi
       - name: Print working directory
         run: pwd
+
+      - name: Change to repository root
+        run: cd $GITHUB_WORKSPACE
+
+      - name: Print working directory 2
+        run: pwd 
       # - name: Map Nexus domain in /etc/hosts
       #   run: |
       #     echo "51.210.167.37 dinsi-nexus.mnhn.cloud" | sudo tee -a /etc/hosts
