@@ -53,26 +53,32 @@ jobs:
           else
             echo "APP_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
           fi
+      - name: Debug secrets
+        run: echo "HARBOR_REGISTRY_PASSWORD is set"
+        env:
+          HARBOR_REGISTRY_PASSWORD: ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
 
-      - name: Map Nexus domain in /etc/hosts
-        run: |
-          echo "51.210.167.37 dinsi-nexus.mnhn.cloud" | sudo tee -a /etc/hosts
-
-      - name: Generate and add Nexus certificate to trust store
-        run: |
-          echo | openssl s_client -showcerts -servername dinsi-nexus.mnhn.cloud -connect 51.210.167.37:443 2>/dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > nexus-cert.pem
-          sudo cp nexus-cert.pem /usr/local/share/ca-certificates/nexus-cert.crt
-          sudo update-ca-certificates
-          sudo keytool -import -trustcacerts -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt -alias nexus-cert -file nexus-cert.pem
-
-      - name: Build JAR
-        run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean package -DskipTests -f ./pom.xml
-
-      - name: Build Docker image
-        run: docker build -t ${{ env.RECOLNAT_REGISTRY }}/dinsi-oci-images-repo/recolnat/${{ inputs.project_ci }}:${{ github.sha }} -f Dockerfile .
-
-      - name: Log in to Docker registry
+      - name: login to docker registry
         run: docker login dfgxr43v.c1.gra9.container-registry.ovh.net -u 'robot$recolnat-ci' -p ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
+      # - name: Map Nexus domain in /etc/hosts
+      #   run: |
+      #     echo "51.210.167.37 dinsi-nexus.mnhn.cloud" | sudo tee -a /etc/hosts
 
-      - name: Push Docker image
-        run: docker push ${{ env.RECOLNAT_REGISTRY }}/dinsi-oci-images-repo/recolnat/${{ inputs.project_ci }}:${{ github.sha }}
+      # - name: Generate and add Nexus certificate to trust store
+      #   run: |
+      #     echo | openssl s_client -showcerts -servername dinsi-nexus.mnhn.cloud -connect 51.210.167.37:443 2>/dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > nexus-cert.pem
+      #     sudo cp nexus-cert.pem /usr/local/share/ca-certificates/nexus-cert.crt
+      #     sudo update-ca-certificates
+      #     sudo keytool -import -trustcacerts -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt -alias nexus-cert -file nexus-cert.pem
+
+      # - name: Build JAR
+      #   run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean package -DskipTests -f ./pom.xml
+
+      # - name: Build Docker image
+      #   run: docker build -t ${{ env.RECOLNAT_REGISTRY }}/dinsi-oci-images-repo/recolnat/${{ inputs.project_ci }}:${{ github.sha }} -f Dockerfile .
+
+      # - name: Log in to Docker registry
+      #   run: docker login dfgxr43v.c1.gra9.container-registry.ovh.net -u 'robot$recolnat-ci' -p ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
+
+      # - name: Push Docker image
+      #   run: docker push ${{ env.RECOLNAT_REGISTRY }}/dinsi-oci-images-repo/recolnat/${{ inputs.project_ci }}:${{ github.sha }}
