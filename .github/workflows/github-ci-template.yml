@@ -67,11 +67,16 @@ jobs:
             echo "APP_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
           fi
 
+      # - name: Build JAR
+      #   run: mvn clean package -DskipTests -Drevision=${{ env.APP_VERSION }} -f ./pom.xml
       - name: Build JAR
-        run: mvn clean package -DskipTests -Drevision=${{ env.APP_VERSION }} -f ./pom.xml
+        run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean package -DskipTests -f ./pom.xml
+      
+      - name: Verify Dockerfile
+        run: ls -l Dockerfile
 
       - name: Build Docker image
-        run: docker build -t dfgxr43v.c1.gra9.container-registry.ovh.net/explorer:${{ github.sha }} .
+        run: docker build -t dfgxr43v.c1.gra9.container-registry.ovh.net/explorer:${{ github.sha }} -f Dockerfile .
 
       - name: Log in to Docker registry
         run: docker login dfgxr43v.c1.gra9.container-registry.ovh.net -u 'robot$recolnat-ci' -p ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
