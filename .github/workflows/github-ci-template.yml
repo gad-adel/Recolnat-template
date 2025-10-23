@@ -75,16 +75,30 @@ jobs:
       - name: Build JAR
         run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean package -DskipTests -f ./pom.xml
 
-      - name: SonarQube Analysis
+      # - name: SonarQube Analysis
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #   run: |
+      #     mvn $MAVEN_CLI_OPTS sonar:sonar \
+      #       -Dsonar.projectKey=${{ inputs.project_ci }} \
+      #       -Dsonar.projectName=${{ inputs.project_ci }} \
+      #       -Dsonar.host.url=${{ secrets.SONAR_URL}} \
+      #       -Dsonar.login=ci-user
+      - name: SonarQube Analysis via Docker
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_URL }}
         run: |
-          mvn $MAVEN_CLI_OPTS sonar:sonar \
+          docker run --rm \
+            -e SONAR_HOST_URL=$SONAR_HOST_URL \
+            -e SONAR_LOGIN=$SONAR_TOKEN \
+            -v "${{ github.workspace }}:/usr/src" \
+            sonarsource/sonar-scanner-cli:latest \
             -Dsonar.projectKey=${{ inputs.project_ci }} \
             -Dsonar.projectName=${{ inputs.project_ci }} \
-            -Dsonar.host.url=${{ secrets.SONAR_URL}} \
-            -Dsonar.login=ci-user
-
+            -Dsonar.sources=. \
+            -Dsonar.java.binaries=target
+      
       # - name: Build Docker image
       #   run: docker build -t ${{ env.RECOLNAT_REGISTRY }}/dinsi-oci-images-repo/recolnat/${{ inputs.project_ci }}:${{ github.sha }} -f Dockerfile .
 
