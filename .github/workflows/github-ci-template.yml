@@ -84,6 +84,14 @@ jobs:
       #       -Dsonar.projectName=${{ inputs.project_ci }} \
       #       -Dsonar.host.url=${{ secrets.SONAR_URL}} \
       #       -Dsonar.login=ci-user
+      - name: echo url and token
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_URL }}
+        run: |
+          echo "SONAR_HOST_URL=http://${{env.SONAR_HOST_URL}}"
+          echo "SONAR_TOKEN=$SONAR_TOKEN"
+
       - name: SonarQube Analysis via Docker
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
