@@ -17,7 +17,11 @@ on:
         type: string
     secrets:
       HARBOR_REGISTRY_PASSWORD:
-        required: false
+        required: true
+      SONAR_TOKEN:
+        required: true
+      SONAR_URL:
+        required: true
 
 env:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
@@ -71,11 +75,21 @@ jobs:
       - name: Build JAR
         run: mvn $MAVEN_CLI_OPTS -Drevision=${{ env.APP_VERSION }} clean package -DskipTests -f ./pom.xml
 
-      - name: Build Docker image
-        run: docker build -t ${{ env.RECOLNAT_REGISTRY }}/dinsi-oci-images-repo/recolnat/${{ inputs.project_ci }}:${{ github.sha }} -f Dockerfile .
+      - name: SonarQube Analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          mvn $MAVEN_CLI_OPTS sonar:sonar \
+            -Dsonar.projectKey=${{ inputs.project_ci }} \
+            -Dsonar.projectName=${{ inputs.project_ci }} \
+            -Dsonar.host.url=${{ secrets.SONAR_URL}} \
+            -Dsonar.login=ci-user
 
-      - name: Log in to Docker registry
-        run: docker login dfgxr43v.c1.gra9.container-registry.ovh.net -u 'robot$recolnat-ci' -p ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
+      # - name: Build Docker image
+      #   run: docker build -t ${{ env.RECOLNAT_REGISTRY }}/dinsi-oci-images-repo/recolnat/${{ inputs.project_ci }}:${{ github.sha }} -f Dockerfile .
 
-      - name: Push Docker image
-        run: docker push ${{ env.RECOLNAT_REGISTRY }}/dinsi-oci-images-repo/recolnat/${{ inputs.project_ci }}:${{ github.sha }}
+      # - name: Log in to Docker registry
+      #   run: docker login dfgxr43v.c1.gra9.container-registry.ovh.net -u 'robot$recolnat-ci' -p ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
+
+      # - name: Push Docker image
+      #   run: docker push ${{ env.RECOLNAT_REGISTRY }}/dinsi-oci-images-repo/recolnat/${{ inputs.project_ci }}:${{ github.sha }}
