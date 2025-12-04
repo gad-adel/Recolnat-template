@@ -19,9 +19,9 @@ on:
       HARBOR_REGISTRY_PASSWORD:
         required: true
       SONAR_TOKEN:
-        required: true
+        required: false
       SONAR_URL:
-        required: true
+        required: false
 
 env:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
@@ -45,8 +45,8 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: "17"
+          distribution: "temurin"
 
       - name: Set app version
         id: set-version
@@ -84,13 +84,13 @@ jobs:
       #       -Dsonar.projectName=${{ inputs.project_ci }} \
       #       -Dsonar.host.url=${{ secrets.SONAR_URL}} \
       #       -Dsonar.login=ci-user
-      - name: echo url and token
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_URL }}
-        run: |
-          echo "SONAR_HOST_URL=http://${{env.SONAR_HOST_URL}}"
-          echo "SONAR_TOKEN=$SONAR_TOKEN"
+      # - name: echo url and token
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #     SONAR_HOST_URL: ${{ secrets.SONAR_URL }}
+      #   run: |
+      #     echo "SONAR_HOST_URL=http://${{env.SONAR_HOST_URL}}"
+      #     echo "SONAR_TOKEN=$SONAR_TOKEN"
 
       # - name: SonarQube Analysis via Docker
       #   env:
@@ -106,7 +106,7 @@ jobs:
       #       -Dsonar.projectName=${{ inputs.project_ci }} \
       #       -Dsonar.sources=. \
       #       -Dsonar.java.binaries=target
-      
+
       - name: Build Docker image
         run: docker build -t ${{ env.RECOLNAT_REGISTRY }}/dinsi-oci-images-repo/recolnat/${{ inputs.project_ci }}:${{ github.sha }} -f Dockerfile .
 
